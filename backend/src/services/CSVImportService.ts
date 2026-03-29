@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { IOrdersRepository } from '../repositories/OrdersRepository.js';
-import { ICustomersRepository } from '../repositories/CustomersRepository.js';
-import { ILocationsRepository } from '../repositories/LocationsRepository.js';
+import { PrismaClient } from "@prisma/client";
+import { IOrdersRepository } from "../repositories/OrdersRepository.js";
+import { ICustomersRepository } from "../repositories/CustomersRepository.js";
+import { ILocationsRepository } from "../repositories/LocationsRepository.js";
 
 interface CSVRow {
   // Order level
@@ -111,16 +111,16 @@ export class CSVImportService implements ICSVImportService {
     private prisma: PrismaClient,
     private ordersRepo: IOrdersRepository,
     private customersRepo: ICustomersRepository,
-    private locationsRepo: ILocationsRepository
+    private locationsRepo: ILocationsRepository,
   ) {}
 
   /**
    * Parse CSV content into structured order data
    */
   parseCSV(csvContent: string): ParsedOrder[] {
-    const lines = csvContent.split('\n').filter(line => line.trim());
+    const lines = csvContent.split("\n").filter((line) => line.trim());
     if (lines.length < 2) {
-      throw new Error('CSV file is empty or has no data rows');
+      throw new Error("CSV file is empty or has no data rows");
     }
 
     // Parse header
@@ -134,57 +134,227 @@ export class CSVImportService implements ICSVImportService {
     const rows: CSVRow[] = [];
     for (let i = 1; i < lines.length; i++) {
       const values = this.parseCSVLine(lines[i]);
-      if (values.length === 0 || values.every(v => !v.trim())) {
+      if (values.length === 0 || values.every((v) => !v.trim())) {
         continue; // Skip empty rows
       }
 
       const row: CSVRow = {
-        orderNumber: this.getCell(values, headerMap, 'order number', 'ordernumber') || '',
-        poNumber: this.getCell(values, headerMap, 'po number', 'ponumber', 'po'),
-        customerName: this.getCell(values, headerMap, 'customer name', 'customername', 'customer'),
-        customerId: this.getCell(values, headerMap, 'customer id', 'customerid'),
+        orderNumber:
+          this.getCell(values, headerMap, "order number", "ordernumber") || "",
+        poNumber: this.getCell(
+          values,
+          headerMap,
+          "po number",
+          "ponumber",
+          "po",
+        ),
+        customerName: this.getCell(
+          values,
+          headerMap,
+          "customer name",
+          "customername",
+          "customer",
+        ),
+        customerId: this.getCell(
+          values,
+          headerMap,
+          "customer id",
+          "customerid",
+        ),
 
-        originName: this.getCell(values, headerMap, 'origin name', 'originname', 'origin'),
-        originAddress1: this.getCell(values, headerMap, 'origin address', 'origin address1', 'originaddress1', 'originaddress'),
-        originAddress2: this.getCell(values, headerMap, 'origin address2', 'originaddress2'),
-        originCity: this.getCell(values, headerMap, 'origin city', 'origincity'),
-        originState: this.getCell(values, headerMap, 'origin state', 'originstate'),
-        originPostalCode: this.getCell(values, headerMap, 'origin postal code', 'origin postalcode', 'originpostalcode', 'origin zip', 'originzip'),
-        originCountry: this.getCell(values, headerMap, 'origin country', 'origincountry'),
-        originId: this.getCell(values, headerMap, 'origin id', 'originid'),
+        originName: this.getCell(
+          values,
+          headerMap,
+          "origin name",
+          "originname",
+          "origin",
+        ),
+        originAddress1: this.getCell(
+          values,
+          headerMap,
+          "origin address",
+          "origin address1",
+          "originaddress1",
+          "originaddress",
+        ),
+        originAddress2: this.getCell(
+          values,
+          headerMap,
+          "origin address2",
+          "originaddress2",
+        ),
+        originCity: this.getCell(
+          values,
+          headerMap,
+          "origin city",
+          "origincity",
+        ),
+        originState: this.getCell(
+          values,
+          headerMap,
+          "origin state",
+          "originstate",
+        ),
+        originPostalCode: this.getCell(
+          values,
+          headerMap,
+          "origin postal code",
+          "origin postalcode",
+          "originpostalcode",
+          "origin zip",
+          "originzip",
+        ),
+        originCountry: this.getCell(
+          values,
+          headerMap,
+          "origin country",
+          "origincountry",
+        ),
+        originId: this.getCell(values, headerMap, "origin id", "originid"),
 
-        destinationName: this.getCell(values, headerMap, 'destination name', 'destinationname', 'destination'),
-        destinationAddress1: this.getCell(values, headerMap, 'destination address', 'destination address1', 'destinationaddress1', 'destinationaddress'),
-        destinationAddress2: this.getCell(values, headerMap, 'destination address2', 'destinationaddress2'),
-        destinationCity: this.getCell(values, headerMap, 'destination city', 'destinationcity'),
-        destinationState: this.getCell(values, headerMap, 'destination state', 'destinationstate'),
-        destinationPostalCode: this.getCell(values, headerMap, 'destination postal code', 'destination postalcode', 'destinationpostalcode', 'destination zip', 'destinationzip'),
-        destinationCountry: this.getCell(values, headerMap, 'destination country', 'destinationcountry'),
-        destinationId: this.getCell(values, headerMap, 'destination id', 'destinationid'),
+        destinationName: this.getCell(
+          values,
+          headerMap,
+          "destination name",
+          "destinationname",
+          "destination",
+        ),
+        destinationAddress1: this.getCell(
+          values,
+          headerMap,
+          "destination address",
+          "destination address1",
+          "destinationaddress1",
+          "destinationaddress",
+        ),
+        destinationAddress2: this.getCell(
+          values,
+          headerMap,
+          "destination address2",
+          "destinationaddress2",
+        ),
+        destinationCity: this.getCell(
+          values,
+          headerMap,
+          "destination city",
+          "destinationcity",
+        ),
+        destinationState: this.getCell(
+          values,
+          headerMap,
+          "destination state",
+          "destinationstate",
+        ),
+        destinationPostalCode: this.getCell(
+          values,
+          headerMap,
+          "destination postal code",
+          "destination postalcode",
+          "destinationpostalcode",
+          "destination zip",
+          "destinationzip",
+        ),
+        destinationCountry: this.getCell(
+          values,
+          headerMap,
+          "destination country",
+          "destinationcountry",
+        ),
+        destinationId: this.getCell(
+          values,
+          headerMap,
+          "destination id",
+          "destinationid",
+        ),
 
-        orderDate: this.getCell(values, headerMap, 'order date', 'orderdate'),
-        requestedPickupDate: this.getCell(values, headerMap, 'pickup date', 'pickupdate', 'requested pickup date', 'requestedpickupdate'),
-        requestedDeliveryDate: this.getCell(values, headerMap, 'delivery date', 'deliverydate', 'requested delivery date', 'requesteddeliverydate'),
+        orderDate: this.getCell(values, headerMap, "order date", "orderdate"),
+        requestedPickupDate: this.getCell(
+          values,
+          headerMap,
+          "pickup date",
+          "pickupdate",
+          "requested pickup date",
+          "requestedpickupdate",
+        ),
+        requestedDeliveryDate: this.getCell(
+          values,
+          headerMap,
+          "delivery date",
+          "deliverydate",
+          "requested delivery date",
+          "requesteddeliverydate",
+        ),
 
-        serviceLevel: this.getCell(values, headerMap, 'service level', 'servicelevel'),
-        temperatureControl: this.getCell(values, headerMap, 'temperature control', 'temperaturecontrol', 'temp control'),
-        requiresHazmat: this.getCell(values, headerMap, 'requires hazmat', 'requireshazmat', 'hazmat required'),
+        serviceLevel: this.getCell(
+          values,
+          headerMap,
+          "service level",
+          "servicelevel",
+        ),
+        temperatureControl: this.getCell(
+          values,
+          headerMap,
+          "temperature control",
+          "temperaturecontrol",
+          "temp control",
+        ),
+        requiresHazmat: this.getCell(
+          values,
+          headerMap,
+          "requires hazmat",
+          "requireshazmat",
+          "hazmat required",
+        ),
 
-        unitId: this.getCell(values, headerMap, 'unit id', 'unitid', 'unit identifier'),
-        unitType: this.getCell(values, headerMap, 'unit type', 'unittype'),
-        customTypeName: this.getCell(values, headerMap, 'custom type name', 'customtypename', 'custom type'),
+        unitId: this.getCell(
+          values,
+          headerMap,
+          "unit id",
+          "unitid",
+          "unit identifier",
+        ),
+        unitType: this.getCell(values, headerMap, "unit type", "unittype"),
+        customTypeName: this.getCell(
+          values,
+          headerMap,
+          "custom type name",
+          "customtypename",
+          "custom type",
+        ),
 
-        sku: this.getCell(values, headerMap, 'sku') || '',
-        description: this.getCell(values, headerMap, 'description', 'item description'),
-        quantity: this.getCell(values, headerMap, 'quantity', 'qty') || '0',
-        weight: this.getCell(values, headerMap, 'weight'),
-        weightUnit: this.getCell(values, headerMap, 'weight unit', 'weightunit'),
-        length: this.getCell(values, headerMap, 'length'),
-        width: this.getCell(values, headerMap, 'width'),
-        height: this.getCell(values, headerMap, 'height'),
-        dimUnit: this.getCell(values, headerMap, 'dim unit', 'dimunit', 'dimension unit'),
-        itemHazmat: this.getCell(values, headerMap, 'item hazmat', 'hazmat', 'itemhazmat'),
-        temperature: this.getCell(values, headerMap, 'temperature', 'temp')
+        sku: this.getCell(values, headerMap, "sku") || "",
+        description: this.getCell(
+          values,
+          headerMap,
+          "description",
+          "item description",
+        ),
+        quantity: this.getCell(values, headerMap, "quantity", "qty") || "0",
+        weight: this.getCell(values, headerMap, "weight"),
+        weightUnit: this.getCell(
+          values,
+          headerMap,
+          "weight unit",
+          "weightunit",
+        ),
+        length: this.getCell(values, headerMap, "length"),
+        width: this.getCell(values, headerMap, "width"),
+        height: this.getCell(values, headerMap, "height"),
+        dimUnit: this.getCell(
+          values,
+          headerMap,
+          "dim unit",
+          "dimunit",
+          "dimension unit",
+        ),
+        itemHazmat: this.getCell(
+          values,
+          headerMap,
+          "item hazmat",
+          "hazmat",
+          "itemhazmat",
+        ),
+        temperature: this.getCell(values, headerMap, "temperature", "temp"),
       };
 
       rows.push(row);
@@ -211,13 +381,13 @@ export class CSVImportService implements ICSVImportService {
       let originData: any = undefined;
       if (firstRow.originName || firstRow.originAddress1) {
         originData = {
-          name: firstRow.originName || 'Unknown',
-          address1: firstRow.originAddress1 || '',
+          name: firstRow.originName || "Unknown",
+          address1: firstRow.originAddress1 || "",
           address2: firstRow.originAddress2,
-          city: firstRow.originCity || '',
+          city: firstRow.originCity || "",
           state: firstRow.originState,
           postalCode: firstRow.originPostalCode,
-          country: firstRow.originCountry || 'US'
+          country: firstRow.originCountry || "US",
         };
       }
 
@@ -225,20 +395,20 @@ export class CSVImportService implements ICSVImportService {
       let destinationData: any = undefined;
       if (firstRow.destinationName || firstRow.destinationAddress1) {
         destinationData = {
-          name: firstRow.destinationName || 'Unknown',
-          address1: firstRow.destinationAddress1 || '',
+          name: firstRow.destinationName || "Unknown",
+          address1: firstRow.destinationAddress1 || "",
           address2: firstRow.destinationAddress2,
-          city: firstRow.destinationCity || '',
+          city: firstRow.destinationCity || "",
           state: firstRow.destinationState,
           postalCode: firstRow.destinationPostalCode,
-          country: firstRow.destinationCountry || 'US'
+          country: firstRow.destinationCountry || "US",
         };
       }
 
       // Group rows by unit ID
       const unitGroups = new Map<string, CSVRow[]>();
       for (const row of orderRows) {
-        const unitKey = row.unitId || 'LEGACY';
+        const unitKey = row.unitId || "LEGACY";
         if (!unitGroups.has(unitKey)) {
           unitGroups.set(unitKey, []);
         }
@@ -246,33 +416,33 @@ export class CSVImportService implements ICSVImportService {
       }
 
       // Build trackable units
-      const trackableUnits: ParsedOrder['trackableUnits'] = [];
+      const trackableUnits: ParsedOrder["trackableUnits"] = [];
       for (const [unitKey, unitRows] of unitGroups.entries()) {
-        if (unitKey === 'LEGACY' || !unitKey) {
+        if (unitKey === "LEGACY" || !unitKey) {
           // Skip legacy items for now - we'll handle them separately if needed
           continue;
         }
 
         const firstUnitRow = unitRows[0];
-        const lineItems = unitRows.map(row => ({
+        const lineItems = unitRows.map((row) => ({
           sku: row.sku,
           description: row.description,
           quantity: parseInt(row.quantity) || 1,
           weight: row.weight ? parseFloat(row.weight) : undefined,
-          weightUnit: row.weightUnit || 'kg',
+          weightUnit: row.weightUnit || "kg",
           length: row.length ? parseFloat(row.length) : undefined,
           width: row.width ? parseFloat(row.width) : undefined,
           height: row.height ? parseFloat(row.height) : undefined,
-          dimUnit: row.dimUnit || 'cm',
+          dimUnit: row.dimUnit || "cm",
           hazmat: this.parseBoolean(row.itemHazmat),
-          temperature: row.temperature
+          temperature: row.temperature,
         }));
 
         trackableUnits.push({
           identifier: unitKey,
-          unitType: firstUnitRow.unitType || 'PALLET',
+          unitType: firstUnitRow.unitType || "PALLET",
           customTypeName: firstUnitRow.customTypeName,
-          lineItems
+          lineItems,
         });
       }
 
@@ -285,13 +455,21 @@ export class CSVImportService implements ICSVImportService {
         originData,
         destinationId: firstRow.destinationId,
         destinationData,
-        orderDate: firstRow.orderDate ? this.parseDate(firstRow.orderDate) : new Date().toISOString(),
-        requestedPickupDate: firstRow.requestedPickupDate ? this.parseDate(firstRow.requestedPickupDate) : undefined,
-        requestedDeliveryDate: firstRow.requestedDeliveryDate ? this.parseDate(firstRow.requestedDeliveryDate) : undefined,
+        orderDate: firstRow.orderDate
+          ? this.parseDate(firstRow.orderDate)
+          : new Date().toISOString(),
+        requestedPickupDate: firstRow.requestedPickupDate
+          ? this.parseDate(firstRow.requestedPickupDate)
+          : undefined,
+        requestedDeliveryDate: firstRow.requestedDeliveryDate
+          ? this.parseDate(firstRow.requestedDeliveryDate)
+          : undefined,
         serviceLevel: this.normalizeServiceLevel(firstRow.serviceLevel),
-        temperatureControl: this.normalizeTemperatureControl(firstRow.temperatureControl),
+        temperatureControl: this.normalizeTemperatureControl(
+          firstRow.temperatureControl,
+        ),
         requiresHazmat: this.parseBoolean(firstRow.requiresHazmat),
-        trackableUnits
+        trackableUnits,
       });
     }
 
@@ -306,39 +484,48 @@ export class CSVImportService implements ICSVImportService {
       success: true,
       ordersCreated: 0,
       errors: [],
-      orders: []
+      orders: [],
     };
 
     try {
       const parsedOrders = this.parseCSV(csvContent);
 
-      for (const parsedOrder of parsedOrders) {
+      for (let rowIndex = 0; rowIndex < parsedOrders.length; rowIndex++) {
+        const parsedOrder = parsedOrders[rowIndex];
+        const rowNumber = rowIndex + 2; // +2 for 1-indexed and header row
         try {
           // Resolve customer
           let customerId = parsedOrder.customerId;
           if (!customerId && parsedOrder.customerName) {
             const customers = await this.customersRepo.all();
-            const customer = customers.find(c =>
-              c.name.toLowerCase() === parsedOrder.customerName!.toLowerCase()
+            const customer = customers.find(
+              (c) =>
+                c.name.toLowerCase() ===
+                parsedOrder.customerName!.toLowerCase(),
             );
             if (customer) {
               customerId = customer.id;
             } else {
-              throw new Error(`Customer "${parsedOrder.customerName}" not found. Please create the customer first.`);
+              throw new Error(
+                `Customer "${parsedOrder.customerName}" not found. Please create the customer first.`,
+              );
             }
           }
 
           if (!customerId) {
-            throw new Error('Customer ID or Customer Name is required');
+            throw new Error("Customer ID or Customer Name is required");
           }
 
           // Resolve origin location
           let originId = parsedOrder.originId;
           if (!originId && parsedOrder.originData) {
             const locations = await this.locationsRepo.all();
-            const location = locations.find(l =>
-              l.name.toLowerCase() === parsedOrder.originData.name.toLowerCase() &&
-              l.city.toLowerCase() === parsedOrder.originData.city.toLowerCase()
+            const location = locations.find(
+              (l) =>
+                l.name.toLowerCase() ===
+                  parsedOrder.originData.name.toLowerCase() &&
+                l.city.toLowerCase() ===
+                  parsedOrder.originData.city.toLowerCase(),
             );
             if (location) {
               originId = location.id;
@@ -349,9 +536,12 @@ export class CSVImportService implements ICSVImportService {
           let destinationId = parsedOrder.destinationId;
           if (!destinationId && parsedOrder.destinationData) {
             const locations = await this.locationsRepo.all();
-            const location = locations.find(l =>
-              l.name.toLowerCase() === parsedOrder.destinationData.name.toLowerCase() &&
-              l.city.toLowerCase() === parsedOrder.destinationData.city.toLowerCase()
+            const location = locations.find(
+              (l) =>
+                l.name.toLowerCase() ===
+                  parsedOrder.destinationData.name.toLowerCase() &&
+                l.city.toLowerCase() ===
+                  parsedOrder.destinationData.city.toLowerCase(),
             );
             if (location) {
               destinationId = location.id;
@@ -363,38 +553,44 @@ export class CSVImportService implements ICSVImportService {
             orderNumber: parsedOrder.orderNumber,
             poNumber: parsedOrder.poNumber,
             customerId,
-            importSource: 'csv',
+            importSource: "csv",
             originId,
             originData: !originId ? parsedOrder.originData : undefined,
             destinationId,
-            destinationData: !destinationId ? parsedOrder.destinationData : undefined,
-            orderDate: parsedOrder.orderDate ? new Date(parsedOrder.orderDate) : undefined,
-            requestedPickupDate: parsedOrder.requestedPickupDate ? new Date(parsedOrder.requestedPickupDate) : undefined,
-            requestedDeliveryDate: parsedOrder.requestedDeliveryDate ? new Date(parsedOrder.requestedDeliveryDate) : undefined,
+            destinationData: !destinationId
+              ? parsedOrder.destinationData
+              : undefined,
+            orderDate: parsedOrder.orderDate
+              ? new Date(parsedOrder.orderDate)
+              : undefined,
+            requestedPickupDate: parsedOrder.requestedPickupDate
+              ? new Date(parsedOrder.requestedPickupDate)
+              : undefined,
+            requestedDeliveryDate: parsedOrder.requestedDeliveryDate
+              ? new Date(parsedOrder.requestedDeliveryDate)
+              : undefined,
             trackableUnits: parsedOrder.trackableUnits,
-            lineItems: [] // We're using trackable units
+            lineItems: [], // We're using trackable units
           });
 
           result.ordersCreated++;
           result.orders.push({
             orderNumber: parsedOrder.orderNumber,
-            id: (order as any).id
+            id: (order as any).id,
           });
-
         } catch (error: any) {
           result.success = false;
           result.errors.push({
-            row: 0, // TODO: track actual row number
-            message: `Order ${parsedOrder.orderNumber}: ${error.message}`
+            row: rowNumber,
+            message: `Order ${parsedOrder.orderNumber}: ${error.message}`,
           });
         }
       }
-
     } catch (error: any) {
       result.success = false;
       result.errors.push({
         row: 0,
-        message: `CSV parsing failed: ${error.message}`
+        message: `CSV parsing failed: ${error.message}`,
       });
     }
 
@@ -406,7 +602,7 @@ export class CSVImportService implements ICSVImportService {
    */
   private parseCSVLine(line: string): string[] {
     const result: string[] = [];
-    let current = '';
+    let current = "";
     let inQuotes = false;
 
     for (let i = 0; i < line.length; i++) {
@@ -421,10 +617,10 @@ export class CSVImportService implements ICSVImportService {
           // Toggle quotes
           inQuotes = !inQuotes;
         }
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === "," && !inQuotes) {
         // End of field
         result.push(current.trim());
-        current = '';
+        current = "";
       } else {
         current += char;
       }
@@ -439,7 +635,11 @@ export class CSVImportService implements ICSVImportService {
   /**
    * Helper: Get cell value with multiple possible header names
    */
-  private getCell(values: string[], headerMap: Map<string, number>, ...possibleNames: string[]): string | undefined {
+  private getCell(
+    values: string[],
+    headerMap: Map<string, number>,
+    ...possibleNames: string[]
+  ): string | undefined {
     for (const name of possibleNames) {
       const index = headerMap.get(name.toLowerCase());
       if (index !== undefined && index < values.length) {
@@ -458,28 +658,31 @@ export class CSVImportService implements ICSVImportService {
   private parseBoolean(value?: string): boolean {
     if (!value) return false;
     const lower = value.toLowerCase().trim();
-    return lower === 'true' || lower === 'yes' || lower === '1' || lower === 'y';
+    return (
+      lower === "true" || lower === "yes" || lower === "1" || lower === "y"
+    );
   }
 
   /**
    * Helper: Normalize service level
    */
   private normalizeServiceLevel(value?: string): string {
-    if (!value) return 'LTL';
+    if (!value) return "LTL";
     const upper = value.toUpperCase().trim();
-    if (upper === 'FTL' || upper === 'FULL TRUCK LOAD') return 'FTL';
-    return 'LTL';
+    if (upper === "FTL" || upper === "FULL TRUCK LOAD") return "FTL";
+    return "LTL";
   }
 
   /**
    * Helper: Normalize temperature control
    */
   private normalizeTemperatureControl(value?: string): string {
-    if (!value) return 'ambient';
+    if (!value) return "ambient";
     const lower = value.toLowerCase().trim();
-    if (lower.includes('refrig') || lower.includes('chilled')) return 'refrigerated';
-    if (lower.includes('froz')) return 'frozen';
-    return 'ambient';
+    if (lower.includes("refrig") || lower.includes("chilled"))
+      return "refrigerated";
+    if (lower.includes("froz")) return "frozen";
+    return "ambient";
   }
 
   /**
@@ -494,10 +697,14 @@ export class CSVImportService implements ICSVImportService {
       }
 
       // Try MM/DD/YYYY
-      const parts = value.split('/');
+      const parts = value.split("/");
       if (parts.length === 3) {
         const [month, day, year] = parts;
-        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        const date = new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+        );
         if (!isNaN(date.getTime())) {
           return date.toISOString();
         }
