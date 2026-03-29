@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { API_URL } from '../api';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useEffect, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { API_URL } from "../api";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-interface ShipmentDetailsProps {}
+type ShipmentDetailsProps = Record<string, never>;
 
 interface Location {
   id: string;
@@ -141,7 +141,7 @@ export default function ShipmentDetails() {
         setShipment(data.data);
       }
     } catch {
-      setError('Failed to load shipment details');
+      setError("Failed to load shipment details");
     } finally {
       setLoading(false);
     }
@@ -153,25 +153,32 @@ export default function ShipmentDetails() {
 
   const handleUpdateStop = async (stopId: string, status: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/v1/shipment-stops/${stopId}/update-orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, method: 'manual' })
-      });
+      const response = await fetch(
+        `${API_URL}/api/v1/shipment-stops/${stopId}/update-orders`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status, method: "manual" }),
+        },
+      );
       const result = await response.json();
       if (!response.ok) {
-        alert(result.error || 'Failed to update stop');
+        alert(result.error || "Failed to update stop");
         return;
       }
       loadShipment();
     } catch {
-      alert('Failed to update stop');
+      alert("Failed to update stop");
     }
   };
 
-  const handleBulkMarkDelivered = async (stopId: string, orderCount: number) => {
-    if (!confirm(`Mark all ${orderCount} orders at this stop as delivered?`)) return;
-    await handleUpdateStop(stopId, 'completed');
+  const handleBulkMarkDelivered = async (
+    stopId: string,
+    orderCount: number,
+  ) => {
+    if (!confirm(`Mark all ${orderCount} orders at this stop as delivered?`))
+      return;
+    await handleUpdateStop(stopId, "completed");
   };
 
   useEffect(() => {
@@ -179,30 +186,32 @@ export default function ShipmentDetails() {
 
     // Load Leaflet dynamically
     const loadMap = async () => {
-      const L = await import('leaflet');
-      await import('leaflet/dist/leaflet.css');
+      const L = await import("leaflet");
+      await import("leaflet/dist/leaflet.css");
 
       // Create map
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
       }
 
-      const map = L.map(mapRef.current!).setView([40.7128, -74.0060], 10); // Default to NYC
+      const map = L.map(mapRef.current!).setView([40.7128, -74.006], 10); // Default to NYC
       mapInstanceRef.current = map;
 
       // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
       }).addTo(map);
 
       // Add markers for origin, stops, and destination
       const markers: L.Marker[] = [];
 
       if (shipment.origin.lat && shipment.origin.lng) {
-        const originMarker = L.marker([shipment.origin.lat, shipment.origin.lng], {
-          icon: L.divIcon({
-            className: 'custom-marker',
-            html: `
+        const originMarker = L.marker(
+          [shipment.origin.lat, shipment.origin.lng],
+          {
+            icon: L.divIcon({
+              className: "custom-marker",
+              html: `
               <div style="
                 background-color: #4CAF50;
                 color: white;
@@ -220,12 +229,15 @@ export default function ShipmentDetails() {
                 O
               </div>
             `,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-          })
-        }).addTo(map);
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            }),
+          },
+        ).addTo(map);
 
-        originMarker.bindPopup(`<b>Origin:</b> ${shipment.origin.name}<br>${shipment.origin.address1}, ${shipment.origin.city}`);
+        originMarker.bindPopup(
+          `<b>Origin:</b> ${shipment.origin.name}<br>${shipment.origin.address1}, ${shipment.origin.city}`,
+        );
         markers.push(originMarker);
       }
 
@@ -233,10 +245,12 @@ export default function ShipmentDetails() {
       if (shipment.lane && shipment.lane.stops) {
         shipment.lane.stops.forEach((stop, index) => {
           if (stop.location.lat && stop.location.lng) {
-            const stopMarker = L.marker([stop.location.lat, stop.location.lng], {
-              icon: L.divIcon({
-                className: 'custom-marker',
-                html: `
+            const stopMarker = L.marker(
+              [stop.location.lat, stop.location.lng],
+              {
+                icon: L.divIcon({
+                  className: "custom-marker",
+                  html: `
                   <div style="
                     background-color: #FF9800;
                     color: white;
@@ -254,15 +268,16 @@ export default function ShipmentDetails() {
                     ${stop.order}
                   </div>
                 `,
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-              })
-            }).addTo(map);
+                  iconSize: [30, 30],
+                  iconAnchor: [15, 15],
+                }),
+              },
+            ).addTo(map);
 
             stopMarker.bindPopup(`
               <b>Stop ${stop.order}:</b> ${stop.location.name}<br>
               ${stop.location.address1}, ${stop.location.city}
-              ${stop.notes ? `<br><i>Note: ${stop.notes}</i>` : ''}
+              ${stop.notes ? `<br><i>Note: ${stop.notes}</i>` : ""}
             `);
             markers.push(stopMarker);
           }
@@ -275,7 +290,7 @@ export default function ShipmentDetails() {
           if (event.lat && event.lng) {
             const eventMarker = L.marker([event.lat, event.lng], {
               icon: L.divIcon({
-                className: 'custom-marker',
+                className: "custom-marker",
                 html: `
                   <div style="
                     background-color: #2196F3;
@@ -295,16 +310,16 @@ export default function ShipmentDetails() {
                   </div>
                 `,
                 iconSize: [24, 24],
-                iconAnchor: [12, 12]
-              })
+                iconAnchor: [12, 12],
+              }),
             }).addTo(map);
 
             const eventTime = new Date(event.eventTime).toLocaleString();
             eventMarker.bindPopup(`
               <b>Event:</b> ${event.eventType}<br>
               <b>Time:</b> ${eventTime}<br>
-              ${event.address ? `<b>Location:</b> ${event.address}<br>` : ''}
-              ${event.locationSummary ? `<i>${event.locationSummary}</i>` : ''}
+              ${event.address ? `<b>Location:</b> ${event.address}<br>` : ""}
+              ${event.locationSummary ? `<i>${event.locationSummary}</i>` : ""}
             `);
             markers.push(eventMarker);
           }
@@ -312,10 +327,12 @@ export default function ShipmentDetails() {
       }
 
       if (shipment.destination.lat && shipment.destination.lng) {
-        const destMarker = L.marker([shipment.destination.lat, shipment.destination.lng], {
-          icon: L.divIcon({
-            className: 'custom-marker',
-            html: `
+        const destMarker = L.marker(
+          [shipment.destination.lat, shipment.destination.lng],
+          {
+            icon: L.divIcon({
+              className: "custom-marker",
+              html: `
               <div style="
                 background-color: #F44336;
                 color: white;
@@ -333,22 +350,27 @@ export default function ShipmentDetails() {
                 D
               </div>
             `,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-          })
-        }).addTo(map);
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            }),
+          },
+        ).addTo(map);
 
-        destMarker.bindPopup(`<b>Destination:</b> ${shipment.destination.name}<br>${shipment.destination.address1}, ${shipment.destination.city}`);
+        destMarker.bindPopup(
+          `<b>Destination:</b> ${shipment.destination.name}<br>${shipment.destination.address1}, ${shipment.destination.city}`,
+        );
         markers.push(destMarker);
       }
 
       // If no coordinates, add a mock location marker
       if (!shipment.origin.lat && !shipment.destination.lat) {
         const mockLat = 40.7128 + (Math.random() - 0.5) * 0.1;
-        const mockLng = -74.0060 + (Math.random() - 0.5) * 0.1;
+        const mockLng = -74.006 + (Math.random() - 0.5) * 0.1;
         L.marker([mockLat, mockLng])
           .addTo(map)
-          .bindPopup(`<b>Mock Location:</b> Shipment in transit<br>Lat: ${mockLat.toFixed(4)}, Lng: ${mockLng.toFixed(4)}`);
+          .bindPopup(
+            `<b>Mock Location:</b> Shipment in transit<br>Lat: ${mockLat.toFixed(4)}, Lng: ${mockLng.toFixed(4)}`,
+          );
       }
 
       // Fit map to show all markers
@@ -372,8 +394,19 @@ export default function ShipmentDetails() {
     return (
       <div className="card">
         <h2>Loading shipment details...</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
-          <span className="material-icons" style={{ animation: 'spin 1s linear infinite' }}>refresh</span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--spacing-1)",
+          }}
+        >
+          <span
+            className="material-icons"
+            style={{ animation: "spin 1s linear infinite" }}
+          >
+            refresh
+          </span>
           Please wait...
         </div>
       </div>
@@ -384,9 +417,11 @@ export default function ShipmentDetails() {
     return (
       <div className="card">
         <h2>Error</h2>
-        <p>{error || 'Shipment not found'}</p>
+        <p>{error || "Shipment not found"}</p>
         <Link to="/shipments" className="button outlined">
-          <span className="material-icons" style={{ fontSize: '18px' }}>arrow_back</span>
+          <span className="material-icons" style={{ fontSize: "18px" }}>
+            arrow_back
+          </span>
           Back to Shipments
         </Link>
       </div>
@@ -394,7 +429,7 @@ export default function ShipmentDetails() {
   }
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Not scheduled';
+    if (!dateString) return "Not scheduled";
     return new Date(dateString).toLocaleDateString();
   };
 
@@ -404,68 +439,131 @@ export default function ShipmentDetails() {
 
   return (
     <div>
-      <div className="card" style={{ marginBottom: 'var(--spacing-3)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2)' }}>
+      <div className="card" style={{ marginBottom: "var(--spacing-3)" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "var(--spacing-2)",
+          }}
+        >
           <h2>Shipment Details: {shipment.reference}</h2>
           <Link to="/shipments" className="button outlined">
-            <span className="material-icons" style={{ fontSize: '18px' }}>arrow_back</span>
+            <span className="material-icons" style={{ fontSize: "18px" }}>
+              arrow_back
+            </span>
             Back to Shipments
           </Link>
         </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "24px",
+            marginBottom: "24px",
+          }}
+        >
           <div>
             <h3>Basic Information</h3>
-            <div style={{ display: 'grid', gap: '8px' }}>
-              <div><strong>Reference:</strong> {shipment.reference}</div>
-              <div><strong>Status:</strong> <span className={`chip ${
-                shipment.status === 'delivered' ? 'chip-success' : 
-                shipment.status === 'in_transit' ? 'chip-warning' : 
-                'chip-primary'
-              }`}>{shipment.status}</span></div>
-              <div><strong>Customer:</strong> {shipment.customer.name}</div>
-              <div><strong>Created:</strong> {formatDateTime(shipment.createdAt)}</div>
-              <div><strong>Updated:</strong> {formatDateTime(shipment.updatedAt)}</div>
+            <div style={{ display: "grid", gap: "8px" }}>
+              <div>
+                <strong>Reference:</strong> {shipment.reference}
+              </div>
+              <div>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`chip ${
+                    shipment.status === "delivered"
+                      ? "chip-success"
+                      : shipment.status === "in_transit"
+                        ? "chip-warning"
+                        : "chip-primary"
+                  }`}
+                >
+                  {shipment.status}
+                </span>
+              </div>
+              <div>
+                <strong>Customer:</strong> {shipment.customer.name}
+              </div>
+              <div>
+                <strong>Created:</strong> {formatDateTime(shipment.createdAt)}
+              </div>
+              <div>
+                <strong>Updated:</strong> {formatDateTime(shipment.updatedAt)}
+              </div>
             </div>
           </div>
-          
+
           <div>
             <h3>Schedule</h3>
-            <div style={{ display: 'grid', gap: '8px' }}>
-              <div><strong>Pickup Date:</strong> {formatDate(shipment.pickupDate)}</div>
-              <div><strong>Delivery Date:</strong> {formatDate(shipment.deliveryDate)}</div>
+            <div style={{ display: "grid", gap: "8px" }}>
+              <div>
+                <strong>Pickup Date:</strong> {formatDate(shipment.pickupDate)}
+              </div>
+              <div>
+                <strong>Delivery Date:</strong>{" "}
+                {formatDate(shipment.deliveryDate)}
+              </div>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "24px",
+          }}
+        >
           <div>
             <h3>Origin</h3>
-            <div style={{ display: 'grid', gap: '4px' }}>
-              <div><strong>{shipment.origin.name}</strong></div>
+            <div style={{ display: "grid", gap: "4px" }}>
+              <div>
+                <strong>{shipment.origin.name}</strong>
+              </div>
               <div>{shipment.origin.address1}</div>
-              {shipment.origin.address2 && <div>{shipment.origin.address2}</div>}
-              <div>{shipment.origin.city}{shipment.origin.state && `, ${shipment.origin.state}`} {shipment.origin.postalCode}</div>
+              {shipment.origin.address2 && (
+                <div>{shipment.origin.address2}</div>
+              )}
+              <div>
+                {shipment.origin.city}
+                {shipment.origin.state && `, ${shipment.origin.state}`}{" "}
+                {shipment.origin.postalCode}
+              </div>
               <div>{shipment.origin.country}</div>
               {shipment.origin.lat && shipment.origin.lng && (
-                <div style={{ fontSize: '0.9em', color: '#666' }}>
-                  📍 {shipment.origin.lat.toFixed(4)}, {shipment.origin.lng.toFixed(4)}
+                <div style={{ fontSize: "0.9em", color: "#666" }}>
+                  📍 {shipment.origin.lat.toFixed(4)},{" "}
+                  {shipment.origin.lng.toFixed(4)}
                 </div>
               )}
             </div>
           </div>
-          
+
           <div>
             <h3>Destination</h3>
-            <div style={{ display: 'grid', gap: '4px' }}>
-              <div><strong>{shipment.destination.name}</strong></div>
+            <div style={{ display: "grid", gap: "4px" }}>
+              <div>
+                <strong>{shipment.destination.name}</strong>
+              </div>
               <div>{shipment.destination.address1}</div>
-              {shipment.destination.address2 && <div>{shipment.destination.address2}</div>}
-              <div>{shipment.destination.city}{shipment.destination.state && `, ${shipment.destination.state}`} {shipment.destination.postalCode}</div>
+              {shipment.destination.address2 && (
+                <div>{shipment.destination.address2}</div>
+              )}
+              <div>
+                {shipment.destination.city}
+                {shipment.destination.state &&
+                  `, ${shipment.destination.state}`}{" "}
+                {shipment.destination.postalCode}
+              </div>
               <div>{shipment.destination.country}</div>
               {shipment.destination.lat && shipment.destination.lng && (
-                <div style={{ fontSize: '0.9em', color: '#666' }}>
-                  📍 {shipment.destination.lat.toFixed(4)}, {shipment.destination.lng.toFixed(4)}
+                <div style={{ fontSize: "0.9em", color: "#666" }}>
+                  📍 {shipment.destination.lat.toFixed(4)},{" "}
+                  {shipment.destination.lng.toFixed(4)}
                 </div>
               )}
             </div>
@@ -474,28 +572,53 @@ export default function ShipmentDetails() {
 
         {/* Lane Information */}
         {shipment.lane && (
-          <div style={{ marginTop: '24px' }}>
+          <div style={{ marginTop: "24px" }}>
             <h3>Lane Information</h3>
-            <div style={{
-              backgroundColor: 'var(--surface-variant)',
-              padding: 'var(--spacing-2)',
-              borderRadius: '8px',
-              border: '1px solid var(--outline-variant)',
-              marginBottom: 'var(--spacing-2)'
-            }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div
+              style={{
+                backgroundColor: "var(--surface-variant)",
+                padding: "var(--spacing-2)",
+                borderRadius: "8px",
+                border: "1px solid var(--outline-variant)",
+                marginBottom: "var(--spacing-2)",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "16px",
+                  marginBottom: "16px",
+                }}
+              >
                 <div>
-                  <div><strong>Lane Name:</strong> {shipment.lane.name}</div>
-                  <div><strong>Status:</strong> <span className={`chip ${
-                    shipment.lane.status === 'active' ? 'chip-success' : 'chip-warning'
-                  }`}>{shipment.lane.status}</span></div>
+                  <div>
+                    <strong>Lane Name:</strong> {shipment.lane.name}
+                  </div>
+                  <div>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      className={`chip ${
+                        shipment.lane.status === "active"
+                          ? "chip-success"
+                          : "chip-warning"
+                      }`}
+                    >
+                      {shipment.lane.status}
+                    </span>
+                  </div>
                 </div>
                 <div>
                   {shipment.lane.distance && (
-                    <div><strong>Distance:</strong> {shipment.lane.distance.toFixed(1)} km</div>
+                    <div>
+                      <strong>Distance:</strong>{" "}
+                      {shipment.lane.distance.toFixed(1)} km
+                    </div>
                   )}
                   {shipment.lane.notes && (
-                    <div><strong>Notes:</strong> {shipment.lane.notes}</div>
+                    <div>
+                      <strong>Notes:</strong> {shipment.lane.notes}
+                    </div>
                   )}
                 </div>
               </div>
@@ -503,66 +626,86 @@ export default function ShipmentDetails() {
               {/* Lane Stops */}
               {shipment.lane.stops && shipment.lane.stops.length > 0 && (
                 <div>
-                  <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--on-surface)' }}>
+                  <h4
+                    style={{
+                      margin: "0 0 12px 0",
+                      fontSize: "1rem",
+                      color: "var(--on-surface)",
+                    }}
+                  >
                     Stops ({shipment.lane.stops.length})
                   </h4>
-                  <div style={{ display: 'grid', gap: '8px' }}>
+                  <div style={{ display: "grid", gap: "8px" }}>
                     {shipment.lane.stops.map((stop, index) => (
                       <div
                         key={stop.id}
                         style={{
-                          display: 'grid',
-                          gridTemplateColumns: '40px 1fr auto',
-                          gap: '12px',
-                          alignItems: 'center',
-                          padding: '12px',
-                          backgroundColor: 'var(--surface)',
-                          borderRadius: '4px',
-                          border: '1px solid var(--outline-variant)'
+                          display: "grid",
+                          gridTemplateColumns: "40px 1fr auto",
+                          gap: "12px",
+                          alignItems: "center",
+                          padding: "12px",
+                          backgroundColor: "var(--surface)",
+                          borderRadius: "4px",
+                          border: "1px solid var(--outline-variant)",
                         }}
                       >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: '#FF9800',
-                          color: 'white',
-                          borderRadius: '50%',
-                          width: '32px',
-                          height: '32px',
-                          fontSize: '0.875rem',
-                          fontWeight: 'bold'
-                        }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#FF9800",
+                            color: "white",
+                            borderRadius: "50%",
+                            width: "32px",
+                            height: "32px",
+                            fontSize: "0.875rem",
+                            fontWeight: "bold",
+                          }}
+                        >
                           {stop.order}
                         </div>
 
                         <div>
-                          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                          <div
+                            style={{ fontWeight: "bold", marginBottom: "4px" }}
+                          >
                             {stop.location.name}
                           </div>
-                          <div style={{ fontSize: '0.875rem', color: 'var(--on-surface-variant)' }}>
+                          <div
+                            style={{
+                              fontSize: "0.875rem",
+                              color: "var(--on-surface-variant)",
+                            }}
+                          >
                             {stop.location.address1}, {stop.location.city}
                             {stop.location.state && `, ${stop.location.state}`}
                           </div>
                           {stop.notes && (
-                            <div style={{
-                              fontSize: '0.875rem',
-                              color: 'var(--on-surface-variant)',
-                              fontStyle: 'italic',
-                              marginTop: '4px'
-                            }}>
+                            <div
+                              style={{
+                                fontSize: "0.875rem",
+                                color: "var(--on-surface-variant)",
+                                fontStyle: "italic",
+                                marginTop: "4px",
+                              }}
+                            >
                               Note: {stop.notes}
                             </div>
                           )}
                         </div>
 
                         {stop.location.lat && stop.location.lng && (
-                          <div style={{
-                            fontSize: '0.75rem',
-                            color: 'var(--on-surface-variant)',
-                            textAlign: 'right'
-                          }}>
-                            📍 {stop.location.lat.toFixed(4)}, {stop.location.lng.toFixed(4)}
+                          <div
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "var(--on-surface-variant)",
+                              textAlign: "right",
+                            }}
+                          >
+                            📍 {stop.location.lat.toFixed(4)},{" "}
+                            {stop.location.lng.toFixed(4)}
                           </div>
                         )}
                       </div>
@@ -575,33 +718,82 @@ export default function ShipmentDetails() {
         )}
 
         {/* Carrier Information */}
-        {(shipment.carrier || (shipment.lane?.laneCarriers && shipment.lane.laneCarriers.length > 0)) && (
-          <div style={{ marginTop: '24px' }}>
+        {(shipment.carrier ||
+          (shipment.lane?.laneCarriers &&
+            shipment.lane.laneCarriers.length > 0)) && (
+          <div style={{ marginTop: "24px" }}>
             <h3>Carrier Information</h3>
 
             {/* Assigned Carrier - From Lane or Manual */}
             {(() => {
-              const assignedCarrier = shipment.carrier || shipment.lane?.laneCarriers?.find(lc => lc.assigned)?.carrier;
+              const assignedCarrier =
+                shipment.carrier ||
+                shipment.lane?.laneCarriers?.find((lc) => lc.assigned)?.carrier;
               if (assignedCarrier) {
                 return (
-                  <div style={{
-                    backgroundColor: 'var(--primary-container)',
-                    padding: 'var(--spacing-2)',
-                    borderRadius: '8px',
-                    border: '2px solid var(--primary)',
-                    marginBottom: 'var(--spacing-2)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)', marginBottom: 'var(--spacing-1)' }}>
-                      <span className="material-icons" style={{ color: 'var(--primary)' }}>check_circle</span>
-                      <strong style={{ color: 'var(--on-primary-container)' }}>Assigned Carrier</strong>
+                  <div
+                    style={{
+                      backgroundColor: "var(--primary-container)",
+                      padding: "var(--spacing-2)",
+                      borderRadius: "8px",
+                      border: "2px solid var(--primary)",
+                      marginBottom: "var(--spacing-2)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "var(--spacing-1)",
+                        marginBottom: "var(--spacing-1)",
+                      }}
+                    >
+                      <span
+                        className="material-icons"
+                        style={{ color: "var(--primary)" }}
+                      >
+                        check_circle
+                      </span>
+                      <strong style={{ color: "var(--on-primary-container)" }}>
+                        Assigned Carrier
+                      </strong>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div><strong>Name:</strong> {assignedCarrier.name}</div>
-                      {assignedCarrier.mcNumber && <div><strong>MC #:</strong> {assignedCarrier.mcNumber}</div>}
-                      {assignedCarrier.dotNumber && <div><strong>DOT #:</strong> {assignedCarrier.dotNumber}</div>}
-                      {assignedCarrier.contactName && <div><strong>Contact:</strong> {assignedCarrier.contactName}</div>}
-                      {assignedCarrier.contactEmail && <div><strong>Email:</strong> {assignedCarrier.contactEmail}</div>}
-                      {assignedCarrier.contactPhone && <div><strong>Phone:</strong> {assignedCarrier.contactPhone}</div>}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "8px",
+                      }}
+                    >
+                      <div>
+                        <strong>Name:</strong> {assignedCarrier.name}
+                      </div>
+                      {assignedCarrier.mcNumber && (
+                        <div>
+                          <strong>MC #:</strong> {assignedCarrier.mcNumber}
+                        </div>
+                      )}
+                      {assignedCarrier.dotNumber && (
+                        <div>
+                          <strong>DOT #:</strong> {assignedCarrier.dotNumber}
+                        </div>
+                      )}
+                      {assignedCarrier.contactName && (
+                        <div>
+                          <strong>Contact:</strong>{" "}
+                          {assignedCarrier.contactName}
+                        </div>
+                      )}
+                      {assignedCarrier.contactEmail && (
+                        <div>
+                          <strong>Email:</strong> {assignedCarrier.contactEmail}
+                        </div>
+                      )}
+                      {assignedCarrier.contactPhone && (
+                        <div>
+                          <strong>Phone:</strong> {assignedCarrier.contactPhone}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -610,141 +802,274 @@ export default function ShipmentDetails() {
             })()}
 
             {/* All Carrier Quotes (for lane-based shipments) */}
-            {shipment.lane?.laneCarriers && shipment.lane.laneCarriers.length > 0 && (
-              <div>
-                <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--on-surface)' }}>
-                  Carrier Quotes ({shipment.lane.laneCarriers.length})
-                </h4>
-                <div className="table-container">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Carrier</th>
-                        <th>Price</th>
-                        <th>Service Level</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {shipment.lane.laneCarriers.map(laneCarrier => (
-                        <tr key={laneCarrier.id} style={laneCarrier.assigned ? { backgroundColor: 'var(--primary-container)' } : {}}>
-                          <td>
-                            <strong>{laneCarrier.carrier.name}</strong>
-                            {laneCarrier.carrier.mcNumber && <div style={{ fontSize: '0.875rem', color: 'var(--on-surface-variant)' }}>MC: {laneCarrier.carrier.mcNumber}</div>}
-                          </td>
-                          <td>
-                            {laneCarrier.price ? `${laneCarrier.currency} ${laneCarrier.price.toFixed(2)}` : '—'}
-                          </td>
-                          <td>{laneCarrier.serviceLevel || '—'}</td>
-                          <td>
-                            {laneCarrier.assigned ? (
-                              <span className="chip chip-success">
-                                <span className="material-icons" style={{ fontSize: '14px' }}>check</span>
-                                Assigned
-                              </span>
-                            ) : (
-                              <span className="chip chip-default">Quote</span>
-                            )}
-                          </td>
+            {shipment.lane?.laneCarriers &&
+              shipment.lane.laneCarriers.length > 0 && (
+                <div>
+                  <h4
+                    style={{
+                      margin: "0 0 12px 0",
+                      fontSize: "1rem",
+                      color: "var(--on-surface)",
+                    }}
+                  >
+                    Carrier Quotes ({shipment.lane.laneCarriers.length})
+                  </h4>
+                  <div className="table-container">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Carrier</th>
+                          <th>Price</th>
+                          <th>Service Level</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {shipment.lane.laneCarriers.map((laneCarrier) => (
+                          <tr
+                            key={laneCarrier.id}
+                            style={
+                              laneCarrier.assigned
+                                ? {
+                                    backgroundColor: "var(--primary-container)",
+                                  }
+                                : {}
+                            }
+                          >
+                            <td>
+                              <strong>{laneCarrier.carrier.name}</strong>
+                              {laneCarrier.carrier.mcNumber && (
+                                <div
+                                  style={{
+                                    fontSize: "0.875rem",
+                                    color: "var(--on-surface-variant)",
+                                  }}
+                                >
+                                  MC: {laneCarrier.carrier.mcNumber}
+                                </div>
+                              )}
+                            </td>
+                            <td>
+                              {laneCarrier.price
+                                ? `${laneCarrier.currency} ${laneCarrier.price.toFixed(2)}`
+                                : "—"}
+                            </td>
+                            <td>{laneCarrier.serviceLevel || "—"}</td>
+                            <td>
+                              {laneCarrier.assigned ? (
+                                <span className="chip chip-success">
+                                  <span
+                                    className="material-icons"
+                                    style={{ fontSize: "14px" }}
+                                  >
+                                    check
+                                  </span>
+                                  Assigned
+                                </span>
+                              ) : (
+                                <span className="chip chip-default">Quote</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         )}
       </div>
 
-      <div className="card" style={{ marginBottom: '24px' }}>
+      <div className="card" style={{ marginBottom: "24px" }}>
         <h3>Location Map</h3>
-        <div 
-          ref={mapRef} 
-          style={{ 
-            height: '400px', 
-            width: '100%', 
-            borderRadius: '8px',
-            border: '1px solid #ddd'
+        <div
+          ref={mapRef}
+          style={{
+            height: "400px",
+            width: "100%",
+            borderRadius: "8px",
+            border: "1px solid #ddd",
           }}
         />
       </div>
 
       {/* Delivery Stops */}
       {shipment.stops && shipment.stops.length > 0 && (
-        <div className="card" style={{ marginBottom: '24px' }}>
+        <div className="card" style={{ marginBottom: "24px" }}>
           <h3>Delivery Stops ({shipment.stops.length})</h3>
-          <div style={{ display: 'grid', gap: '12px' }}>
+          <div style={{ display: "grid", gap: "12px" }}>
             {shipment.stops.map((stop) => {
               const stopStatusChip: { [key: string]: string } = {
-                pending: 'chip chip-warning',
-                arrived: 'chip chip-info',
-                in_progress: 'chip chip-warning',
-                completed: 'chip chip-success',
-                skipped: 'chip chip-primary'
+                pending: "chip chip-warning",
+                arrived: "chip chip-info",
+                in_progress: "chip chip-warning",
+                completed: "chip chip-success",
+                skipped: "chip chip-primary",
               };
 
               const activeOrders = stop.orders.filter(
-                o => o.deliveryStatus !== 'delivered' && o.deliveryStatus !== 'cancelled'
+                (o) =>
+                  o.deliveryStatus !== "delivered" &&
+                  o.deliveryStatus !== "cancelled",
               );
 
               return (
-                <div key={stop.id} style={{
-                  padding: 'var(--spacing-2)',
-                  backgroundColor: 'var(--surface-container)',
-                  borderRadius: '8px',
-                  border: stop.status === 'completed' ? '2px solid var(--color-success)' : '1px solid var(--outline-variant)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        backgroundColor: stop.status === 'completed' ? 'var(--color-success)' : '#FF9800',
-                        color: 'white', borderRadius: '50%', width: '32px', height: '32px',
-                        fontSize: '0.875rem', fontWeight: 'bold'
-                      }}>
-                        {stop.status === 'completed' ? (
-                          <span className="material-icons" style={{ fontSize: '18px' }}>check</span>
-                        ) : stop.sequenceNumber}
+                <div
+                  key={stop.id}
+                  style={{
+                    padding: "var(--spacing-2)",
+                    backgroundColor: "var(--surface-container)",
+                    borderRadius: "8px",
+                    border:
+                      stop.status === "completed"
+                        ? "2px solid var(--color-success)"
+                        : "1px solid var(--outline-variant)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor:
+                            stop.status === "completed"
+                              ? "var(--color-success)"
+                              : "#FF9800",
+                          color: "white",
+                          borderRadius: "50%",
+                          width: "32px",
+                          height: "32px",
+                          fontSize: "0.875rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {stop.status === "completed" ? (
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "18px" }}
+                          >
+                            check
+                          </span>
+                        ) : (
+                          stop.sequenceNumber
+                        )}
                       </div>
                       <div>
-                        <div style={{ fontWeight: '600' }}>{stop.location.name}</div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--on-surface-variant)' }}>
-                          {stop.location.address1}, {stop.location.city}{stop.location.state && `, ${stop.location.state}`}
+                        <div style={{ fontWeight: "600" }}>
+                          {stop.location.name}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "var(--on-surface-variant)",
+                          }}
+                        >
+                          {stop.location.address1}, {stop.location.city}
+                          {stop.location.state && `, ${stop.location.state}`}
                         </div>
                       </div>
                     </div>
-                    <span className={stopStatusChip[stop.status] || 'chip chip-primary'}>
-                      {stop.status.replace(/_/g, ' ')}
+                    <span
+                      className={
+                        stopStatusChip[stop.status] || "chip chip-primary"
+                      }
+                    >
+                      {stop.status.replace(/_/g, " ")}
                     </span>
                   </div>
 
                   {/* Timing */}
-                  {(stop.actualArrival || stop.actualDeparture || stop.estimatedArrival) && (
-                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.875rem', color: 'var(--on-surface-variant)', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      {stop.estimatedArrival && <span>ETA: {new Date(stop.estimatedArrival).toLocaleString()}</span>}
-                      {stop.actualArrival && <span>Arrived: {new Date(stop.actualArrival).toLocaleString()}</span>}
-                      {stop.actualDeparture && <span>Departed: {new Date(stop.actualDeparture).toLocaleString()}</span>}
+                  {(stop.actualArrival ||
+                    stop.actualDeparture ||
+                    stop.estimatedArrival) && (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "16px",
+                        fontSize: "0.875rem",
+                        color: "var(--on-surface-variant)",
+                        marginBottom: "8px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {stop.estimatedArrival && (
+                        <span>
+                          ETA:{" "}
+                          {new Date(stop.estimatedArrival).toLocaleString()}
+                        </span>
+                      )}
+                      {stop.actualArrival && (
+                        <span>
+                          Arrived:{" "}
+                          {new Date(stop.actualArrival).toLocaleString()}
+                        </span>
+                      )}
+                      {stop.actualDeparture && (
+                        <span>
+                          Departed:{" "}
+                          {new Date(stop.actualDeparture).toLocaleString()}
+                        </span>
+                      )}
                     </div>
                   )}
 
                   {/* Orders at this stop */}
                   {stop.orders.length > 0 && (
-                    <div style={{ marginBottom: '8px' }}>
-                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px', color: 'var(--on-surface-variant)' }}>
+                    <div style={{ marginBottom: "8px" }}>
+                      <div
+                        style={{
+                          fontSize: "0.75rem",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.04em",
+                          marginBottom: "4px",
+                          color: "var(--on-surface-variant)",
+                        }}
+                      >
                         Orders ({stop.orders.length})
                       </div>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {stop.orders.map(o => {
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {stop.orders.map((o) => {
                           const deliveryChip: { [key: string]: string } = {
-                            unassigned: 'chip-primary', assigned: 'chip-info',
-                            in_transit: 'chip-warning', delivered: 'chip-success',
-                            exception: 'chip-error', cancelled: 'chip-primary'
+                            unassigned: "chip-primary",
+                            assigned: "chip-info",
+                            in_transit: "chip-warning",
+                            delivered: "chip-success",
+                            exception: "chip-error",
+                            cancelled: "chip-primary",
                           };
                           return (
-                            <Link key={o.id} to={`/orders/${o.id}`} style={{ textDecoration: 'none' }}>
-                              <span className={`chip ${deliveryChip[o.deliveryStatus] || 'chip-primary'}`}>
-                                {o.orderNumber} — {o.deliveryStatus.replace(/_/g, ' ')}
+                            <Link
+                              key={o.id}
+                              to={`/orders/${o.id}`}
+                              style={{ textDecoration: "none" }}
+                            >
+                              <span
+                                className={`chip ${deliveryChip[o.deliveryStatus] || "chip-primary"}`}
+                              >
+                                {o.orderNumber} —{" "}
+                                {o.deliveryStatus.replace(/_/g, " ")}
                               </span>
                             </Link>
                           );
@@ -754,23 +1079,58 @@ export default function ShipmentDetails() {
                   )}
 
                   {/* Action Buttons */}
-                  {stop.status !== 'completed' && stop.status !== 'skipped' && (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }} className="no-print">
-                      {stop.status === 'pending' && (
-                        <button onClick={() => handleUpdateStop(stop.id, 'arrived')} className="button button-sm button-outline">
-                          <span className="material-icons" style={{ fontSize: '16px' }}>place</span>
+                  {stop.status !== "completed" && stop.status !== "skipped" && (
+                    <div
+                      style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
+                      className="no-print"
+                    >
+                      {stop.status === "pending" && (
+                        <button
+                          onClick={() => handleUpdateStop(stop.id, "arrived")}
+                          className="button button-sm button-outline"
+                        >
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "16px" }}
+                          >
+                            place
+                          </span>
                           Mark Arrived
                         </button>
                       )}
-                      {stop.status === 'arrived' && (
-                        <button onClick={() => handleUpdateStop(stop.id, 'in_progress')} className="button button-sm button-outline">
-                          <span className="material-icons" style={{ fontSize: '16px' }}>local_shipping</span>
+                      {stop.status === "arrived" && (
+                        <button
+                          onClick={() =>
+                            handleUpdateStop(stop.id, "in_progress")
+                          }
+                          className="button button-sm button-outline"
+                        >
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "16px" }}
+                          >
+                            local_shipping
+                          </span>
                           Mark In Progress
                         </button>
                       )}
-                      {(stop.status === 'arrived' || stop.status === 'in_progress') && (
-                        <button onClick={() => handleBulkMarkDelivered(stop.id, activeOrders.length)} className="button button-sm button-success">
-                          <span className="material-icons" style={{ fontSize: '16px' }}>check_circle</span>
+                      {(stop.status === "arrived" ||
+                        stop.status === "in_progress") && (
+                        <button
+                          onClick={() =>
+                            handleBulkMarkDelivered(
+                              stop.id,
+                              activeOrders.length,
+                            )
+                          }
+                          className="button button-sm button-success"
+                        >
+                          <span
+                            className="material-icons"
+                            style={{ fontSize: "16px" }}
+                          >
+                            check_circle
+                          </span>
                           Complete Stop ({activeOrders.length} orders)
                         </button>
                       )}
@@ -784,36 +1144,52 @@ export default function ShipmentDetails() {
       )}
 
       {/* Orders on this Shipment (not linked to stops) */}
-      {shipment.orderShipments && shipment.orderShipments.length > 0 && (!shipment.stops || shipment.stops.length === 0) && (
-        <div className="card" style={{ marginBottom: '24px' }}>
-          <h3>Orders ({shipment.orderShipments.length})</h3>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {shipment.orderShipments.map(os => {
-              const deliveryChip: { [key: string]: string } = {
-                unassigned: 'chip-primary', assigned: 'chip-info',
-                in_transit: 'chip-warning', delivered: 'chip-success',
-                exception: 'chip-error', cancelled: 'chip-primary'
-              };
-              return (
-                <Link key={os.order.id} to={`/orders/${os.order.id}`} style={{ textDecoration: 'none' }}>
-                  <span className={`chip ${deliveryChip[os.order.deliveryStatus] || 'chip-primary'}`}>
-                    {os.order.orderNumber} — {os.order.deliveryStatus.replace(/_/g, ' ')}
-                  </span>
-                </Link>
-              );
-            })}
+      {shipment.orderShipments &&
+        shipment.orderShipments.length > 0 &&
+        (!shipment.stops || shipment.stops.length === 0) && (
+          <div className="card" style={{ marginBottom: "24px" }}>
+            <h3>Orders ({shipment.orderShipments.length})</h3>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {shipment.orderShipments.map((os) => {
+                const deliveryChip: { [key: string]: string } = {
+                  unassigned: "chip-primary",
+                  assigned: "chip-info",
+                  in_transit: "chip-warning",
+                  delivered: "chip-success",
+                  exception: "chip-error",
+                  cancelled: "chip-primary",
+                };
+                return (
+                  <Link
+                    key={os.order.id}
+                    to={`/orders/${os.order.id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <span
+                      className={`chip ${deliveryChip[os.order.deliveryStatus] || "chip-primary"}`}
+                    >
+                      {os.order.orderNumber} —{" "}
+                      {os.order.deliveryStatus.replace(/_/g, " ")}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <div className="card">
         <h3>Shipment Events</h3>
-        {(!shipment.events || shipment.events.length === 0) ? (
-          <p style={{ color: '#666', fontStyle: 'italic' }}>
-            No events recorded yet. Events will appear here when the shipment is tracked via GPS devices.
+        {!shipment.events || shipment.events.length === 0 ? (
+          <p style={{ color: "#666", fontStyle: "italic" }}>
+            No events recorded yet. Events will appear here when the shipment is
+            tracked via GPS devices.
           </p>
         ) : (
-          <div className="table-container" style={{ marginTop: 'var(--spacing-2)' }}>
+          <div
+            className="table-container"
+            style={{ marginTop: "var(--spacing-2)" }}
+          >
             <table className="table">
               <thead>
                 <tr>
@@ -825,29 +1201,36 @@ export default function ShipmentDetails() {
                 </tr>
               </thead>
               <tbody>
-                {shipment.events.map(event => (
+                {shipment.events.map((event) => (
                   <tr key={event.id}>
                     <td>{new Date(event.eventTime).toLocaleString()}</td>
                     <td>
-                      <span className={`chip ${
-                        event.eventType === 'location' ? 'chip-primary' : 'chip-default'
-                      }`}>
+                      <span
+                        className={`chip ${
+                          event.eventType === "location"
+                            ? "chip-primary"
+                            : "chip-default"
+                        }`}
+                      >
                         {event.eventType}
                       </span>
                     </td>
-                    <td>
-                      {event.locationSummary || event.address || '—'}
-                    </td>
+                    <td>{event.locationSummary || event.address || "—"}</td>
                     <td>
                       {event.lat && event.lng ? (
-                        <span style={{ fontSize: '0.875rem', color: 'var(--on-surface-variant)' }}>
+                        <span
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "var(--on-surface-variant)",
+                          }}
+                        >
                           📍 {event.lat.toFixed(4)}, {event.lng.toFixed(4)}
                         </span>
-                      ) : '—'}
+                      ) : (
+                        "—"
+                      )}
                     </td>
-                    <td>
-                      {event.deviceName || event.deviceId || '—'}
-                    </td>
+                    <td>{event.deviceName || event.deviceId || "—"}</td>
                   </tr>
                 ))}
               </tbody>
